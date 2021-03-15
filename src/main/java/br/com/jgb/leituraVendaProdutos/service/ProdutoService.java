@@ -5,6 +5,8 @@ import java.math.RoundingMode;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import br.com.jgb.leituraVendaProdutos.dto.CalculoVendaProdutoLojistas;
@@ -19,6 +21,8 @@ import br.com.jgb.leituraVendaProdutos.repository.ProdutoRepository;
  */
 @Service
 public class ProdutoService {
+
+	Logger logger = LoggerFactory.getLogger(ProdutoService.class);
 
 	private ProdutoRepository produtoRepository;
 	private ArquivoImportacaoService arquivoImportacaoService;
@@ -36,14 +40,14 @@ public class ProdutoService {
 	 */
 	public void salvar(List<Produto> produtos, String nomeArquivo) {
 
-		System.out.println("-> Início da leitura do arquivo: " + nomeArquivo);
+		logger.trace("-> Início da leitura do arquivo: " + nomeArquivo);
 
 		// não pode ter produtos repetidos na lista
 		List<Produto> listaNaoDuplicada = produtos.stream().distinct().collect(Collectors.toList());
 		long totalRegistros = listaNaoDuplicada.size();
 		long indiceSalvo = 0;
 
-		System.out.println("--> Total de registros do arquivo " + nomeArquivo + ": " + totalRegistros);
+		logger.trace("--> Total de registros do arquivo " + nomeArquivo + ": " + totalRegistros);
 
 		// verifica se o arquivo já foi lido para continuar
 		ArquivoImportacao arquivoImportacao = arquivoImportacaoService.buscaPorNome(nomeArquivo);
@@ -61,22 +65,22 @@ public class ProdutoService {
 			// precisa dar continuidade de onde parou no arquivo
 			if (indiceSalvo > qtdeRegistrosLidos) {
 
-				System.out.println("--> Salvando produto do arquivo " + nomeArquivo + ", " + indiceSalvo + " de "
+				logger.trace("--> Salvando produto do arquivo " + nomeArquivo + ", " + indiceSalvo + " de "
 						+ totalRegistros + " : " + produto);
 				produtoRepository.save(produto);
 
-				System.out.println("--> Salvando arquivo de importação: " + arquivoImportacao);
+				logger.trace("--> Salvando arquivo de importação: " + arquivoImportacao);
 				arquivoImportacao.setRecordsRead(indiceSalvo);
 				arquivoImportacaoService.save(arquivoImportacao);
 
 			} else {
 
-				System.out.println("--> Produto não foi salvo, pois já tem leitura para esse índice. " + nomeArquivo
-						+ ", " + indiceSalvo + " de " + totalRegistros + " : " + produto);
+				logger.trace("--> Produto não foi salvo, pois já tem leitura para esse índice. " + nomeArquivo + ", "
+						+ indiceSalvo + " de " + totalRegistros + " : " + produto);
 			}
 		}
 
-		System.out.println("-> Fim da leirura do arquivo: " + nomeArquivo);
+		logger.trace("-> Fim da leirura do arquivo: " + nomeArquivo);
 	}
 
 	/**

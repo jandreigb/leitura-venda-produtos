@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
@@ -21,6 +23,8 @@ import br.com.jgb.leituraVendaProdutos.dto.ArquivoProdutos;
 @Service
 public class LeituraDadosService {
 
+	Logger logger = LoggerFactory.getLogger(LeituraDadosService.class);
+
 	@Autowired
 	private ProdutoService produtoService;
 
@@ -29,7 +33,8 @@ public class LeituraDadosService {
 	 */
 	public void efetuaLeituraDados() {
 
-		System.out.println("********** Inicialização da leitura de arquivos...");
+		logger.trace("********** Inicialização da leitura de arquivos...");
+
 		long tempoInicial = System.currentTimeMillis();
 
 		try {
@@ -53,20 +58,18 @@ public class LeituraDadosService {
 						produtoService.salvar(arquivo.getData(), resource.getFilename());
 
 					} catch (IOException e) {
-						System.out.println("----- Erro na leirura do arquivo.");
-						e.printStackTrace();
+						logger.error("Erro na leirura do arquivo.", e);
 					}
 				});
 
 			}
 
 		} catch (IOException e) {
-			System.out.println("----- Erro na leirura dos arquivos.");
-			e.printStackTrace();
+			logger.error("Erro na leirura dos arquivos.", e);
 		}
 
-		System.out.println("********** Fim da leitura de arquivos. ");
+		logger.trace("********** Fim da leitura de arquivos. ");
 		long tempoFinal = System.currentTimeMillis();
-		System.out.printf("Duração: %.3f segundos", (tempoFinal - tempoInicial) / 1000d);
+		logger.trace("Duração: %.3f segundos", (tempoFinal - tempoInicial) / 1000d);
 	}
 }
